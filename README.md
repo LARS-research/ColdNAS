@@ -20,3 +20,5 @@ ColdNAS: Search to Modulate for User Cold-Start Recommendation. WebConf 2023
 
     - Train and evaluate the searched model by running 'evaluate.py'
     
+## update 2024.12.4
+    - 1-normalize during search

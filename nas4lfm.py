@@ -66,12 +66,13 @@ class SuperNet(torch.nn.Module):
         self.optim=torch.optim.Adam(self.parameters(),config['lr_i'])
 
     def modulate(self,x,maxp,minp,mutp,addp,alpha):
-        x=alpha[0]*torch.maximum(x,maxp)+(1-alpha[0])*x
-        x=alpha[1]*torch.minimum(x,minp)+(1-alpha[1])*x
+        x1=F.normalize(x,1.0,-1)
+        x=alpha[0]*F.normalize(torch.maximum(x,maxp),1.0,-1)+(1-alpha[0])*x1
+        x=alpha[1]*F.normalize(torch.minimum(x,minp),1.0,-1)+(1-alpha[1])*x1
         
-        x=alpha[2]*x*mutp+(1-alpha[2])*x
-        x=alpha[3]*(x+addp)+(1-alpha[3])*x
-        
+        x=alpha[2]*F.normalize(x*mutp,1.0,-1)+(1-alpha[2])*x1
+        x=alpha[3]*F.normalize((x+addp),1.0,-1)+(1-alpha[3])*x1
+        #x+=x0
         return x
 
     def forward(self, xs,ys,xq, training = True):
@@ -97,6 +98,7 @@ class SuperNet(torch.nn.Module):
         d=0
         x=emb
         x=self.modulate(x,maxp[:self.embedding_dim*2],minp[:self.embedding_dim*2],mutp[:self.embedding_dim*2],addp[:self.embedding_dim*2],alpha[0])
+        x=x.normalize
         x=F.leaky_relu(x)
         x=self.fc1(x)
         d+=self.embedding_dim*2
